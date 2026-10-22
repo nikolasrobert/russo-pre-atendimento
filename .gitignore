@@ -1,0 +1,29 @@
+# Dependências
+/vendor/
+composer.phar
+
+# Configuração local (credenciais ficam só aqui)
+.env
+
+# Arquivos gerados pelo CodeIgniter
+/writable/cache/*
+!/writable/cache/index.html
+/writable/logs/*
+!/writable/logs/index.html
+/writable/session/*
+!/writable/session/index.html
+/writable/uploads/*
+!/writable/uploads/index.html
+/writable/debugbar/*
+/writable/*.db
+
+# Testes
+/build/
+.phpunit.cache/
+.phpunit.result.cache
+
+# Editor e sistema
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

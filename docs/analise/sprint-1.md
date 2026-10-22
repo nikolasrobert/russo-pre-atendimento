@@ -27,7 +27,7 @@ Duas frentes, em outubro de 2026:
 
 ## 3. Persona
 
-**Vinicius "Russo"**, [__] anos, tatuador autônomo no Expurgo Tattoo, Vila Velha (ES). Atende Vitória e Vila Velha.
+**Vinicius "Russo"**, 25 anos, tatuador autônomo no Expurgo Tattoo, Vila Velha (ES). Atende Vitória e Vila Velha.
 
 | | |
 | --- | --- |

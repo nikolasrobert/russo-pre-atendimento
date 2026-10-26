@@ -29,6 +29,10 @@ Duas frentes, em outubro de 2026:
 
 > Revisada depois do retorno do professor: a persona representa o público para quem vamos vender. O Russo é o nosso cliente, e as informações dele serviram de base.
 
+### O tatuador que não quer ser atendente
+
+Ele quer tatuar, e o atendimento rouba o tempo dele.
+
 **Lucas Andrade**, 28 anos, tatuador autônomo (MEI). Aluga uma bancada num estúdio compartilhado em Vila Velha (ES).
 
 | | |

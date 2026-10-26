@@ -6,7 +6,7 @@ Apresentação: 27/10/2026, por Caio Sperandio (negócio) e Nikolas Robert (téc
 
 | Ponto | Antes | Agora |
 | --- | --- | --- |
-| Persona | O próprio Russo | Um tatuador típico do público. O Russo é o nosso cliente |
+| Persona | O próprio Russo | O tatuador que não quer ser atendente. O Russo é o nosso cliente |
 | Público-alvo | Tatuadores autônomos | Tatuadores sem ninguém no atendimento, ou com um atendimento que não funciona |
 | Base técnica | CodeIgniter 4 | A stack que já está no ar: Netlify + n8n |
 | Banco | MySQL | Supabase (Postgres na nuvem, com as fotos) |

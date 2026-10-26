@@ -1,6 +1,6 @@
 # Regras de pontuação
 
-Regra usada na versão que está no ar (`integracoes/n8n/code/normaliza.js`). No CodeIgniter 4 ela vira a classe `app/Libraries/Pontuacao.php`, com teste em `tests/unit/PontuacaoTest.php`.
+Regra usada no n8n ([n8n/code/normaliza.js](../n8n/code/normaliza.js)), coberta pelos testes em `tests/code-nodes.test.js`.
 
 | Condição | Pontos | Motivo |
 | --- | --- | --- |

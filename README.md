@@ -1,19 +1,19 @@
-# Russo · Painel de pré-atendimento
+# Russo · Pré-atendimento para tatuadores
 
-Sistema web em **CodeIgniter 4** para um tatuador organizar os pedidos de orçamento que chegam pelo Instagram. O cliente preenche uma ficha pelo celular (ideia, local do corpo, tamanho, faixa de investimento e fotos). O tatuador vê as fichas num painel, já pontuadas como quentes, mornas ou frias, e recebe um aviso no WhatsApp.
+O cliente preenche uma ficha pelo celular: ideia, local do corpo, tamanho, faixa de investimento e fotos. A ficha é salva no banco e pontuada como quente, morna ou fria. Em seguida vira um card no quadro do tatuador no Trello, e as fichas quentes chegam na hora no WhatsApp dele.
 
-O cliente real é o tatuador Vinicius Russo ([@russo.tattooer](https://instagram.com/russo.tattooer)), de Vila Velha (ES). Uma primeira versão, feita com HTML, Netlify, n8n e Notion, já está no ar. Este repositório é a reconstrução em CodeIgniter 4 para o trabalho de Desenvolvimento Web.
+O cliente real é o tatuador Vinicius Russo ([@russo.tattooer](https://instagram.com/russo.tattooer)), de Vila Velha (ES). A ficha dele está no ar em https://ficha-russo.netlify.app. Este repositório é o trabalho de Desenvolvimento Web do IFES construído em cima dessa base.
 
 ## Integrantes
 
 | Integrante | Frente |
 | --- | --- |
 | Caio Sperandio | Análise e negócio: viabilidade, preço e documento em PDF |
-| Elson | Banco: migrations, seeders e Models com validação |
-| Álvaro | Painel: CRUD das fichas, com filtros |
-| Arthur | CRUD de clientes e agenda de sessões |
-| Matheus | Ficha pública, upload de fotos e interface responsiva |
-| Nikolas Robert | Arquitetura, login, integração com WhatsApp e deploy |
+| Elson Ramos | Banco no Supabase: tabelas, regras e dados de exemplo |
+| Álvaro de Vargas | Integração com o Trello: card, colunas e sincronização de status |
+| Arthur de França | Sessões e resumo diário |
+| Matheus de Oliveira Fragoso | Ficha pública, upload de fotos e interface responsiva |
+| Nikolas Robert | Arquitetura, funções do Netlify, n8n, WhatsApp e deploy |
 
 Turma: ____
 
@@ -22,7 +22,7 @@ Turma: ____
 | Sprint | Data | Situação |
 | --- | --- | --- |
 | 1 · Análise e planejamento | 22/10 | Entregue: [docs/analise/sprint-1.md](docs/analise/sprint-1.md) |
-| 2 · Negócio e base técnica | 27/10 | Em andamento |
+| 2 · Negócio e base técnica | 27/10 | Entregue: [docs/analise/sprint-2.md](docs/analise/sprint-2.md) |
 | 3 · Funcionalidades | 05/11 e 11/11 | A fazer |
 | 4 · Entrega final | 24/11 e 26/11 | A fazer |
 
@@ -30,81 +30,74 @@ O que cada um faz em cada sprint: [docs/backlog.md](docs/backlog.md). Roteiro de
 
 ## Tecnologias
 
-- PHP 8.2 ou mais novo, com as extensões `intl`, `mbstring`, `mysqlnd` e `fileinfo`
-- CodeIgniter 4 (instalado pelo Composer)
-- MySQL 8 ou MariaDB 10.6+
-- CSS próprio na ficha pública (visual "papel de decalque") e Bootstrap 5 no painel
-- n8n e WhatsApp Cloud API para o aviso ao tatuador
-
-## Instalação
-
-> A base do CodeIgniter 4 entra na Sprint 2. Os passos abaixo valem a partir dela.
-
-```bash
-git clone https://github.com/nikolasrobert/russo-painel-ci4.git
-cd russo-painel-ci4
-composer install
-cp env .env
-```
-
-No `.env`, ajuste:
-
-```ini
-CI_ENVIRONMENT = development
-app.baseURL = 'http://localhost:8080/'
-
-database.default.hostname = localhost
-database.default.database = russo_painel
-database.default.username = root
-database.default.password =
-database.default.DBDriver = MySQLi
-
-# senha do usuário do painel criado pelo seeder
-PAINEL_SENHA_INICIAL = troque-esta-senha
-
-# opcional: aviso no WhatsApp (Sprint 3)
-N8N_WEBHOOK_URL =
-```
-
-O `.env` nunca vai para o Git.
-
-## Como criar o banco
-
-```sql
-CREATE DATABASE russo_painel CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
-```bash
-php spark migrate
-php spark db:seed DatabaseSeeder
-```
-
-As tabelas e os campos estão descritos em [docs/modelo-de-dados.md](docs/modelo-de-dados.md).
+| Parte | Tecnologia |
+| --- | --- |
+| Ficha pública (View) | HTML, CSS e JavaScript puros, mobile-first, no Netlify |
+| API (Controller) | Netlify Functions em Node.js 20 |
+| Banco e fotos (Model) | Supabase: Postgres, Storage e regras de acesso por linha (RLS) |
+| Automação | n8n |
+| Painel do tatuador | Trello |
+| Aviso | WhatsApp Cloud API |
 
 ## Como rodar
 
+Requisitos: Node.js 20 ou mais novo e o [Netlify CLI](https://docs.netlify.com/cli/get-started/).
+
 ```bash
-php spark serve
+git clone https://github.com/nikolasrobert/russo-pre-atendimento.git
+cd russo-pre-atendimento
+npm install
+npm test            # testes da função e da pontuação
+netlify dev         # ficha em http://localhost:8888
 ```
 
-- Ficha pública: http://localhost:8080/
-- Painel: http://localhost:8080/painel (login `russo@exemplo.com` com a senha de `PAINEL_SENHA_INICIAL`)
+Variáveis de ambiente (no painel do Netlify ou num `.env` que nunca vai para o Git):
 
-## Estrutura
+| Variável | Para quê |
+| --- | --- |
+| `SUPABASE_URL` | Endereço do projeto no Supabase |
+| `SUPABASE_SERVICE_ROLE_KEY` | Chave de serviço, usada só dentro das funções |
+| `N8N_WEBHOOK_URL` | Webhook do n8n que pontua e distribui a ficha |
+| `FICHA_TOKEN` | Opcional: segredo conferido pelo n8n |
+
+## Como criar o banco
+
+1. Crie um projeto em https://supabase.com.
+2. No SQL Editor, rode [supabase/migrations/0001_schema.sql](supabase/migrations/0001_schema.sql). Ele cria as 6 tabelas, as regras de acesso e o bucket de fotos.
+3. Para ter dados de teste, rode [supabase/seed.sql](supabase/seed.sql).
+
+Com o [Supabase CLI](https://supabase.com/docs/guides/cli): `supabase db push` aplica a migration e `supabase db reset` recria o banco com o seed.
+
+As tabelas estão descritas em [docs/modelo-de-dados.md](docs/modelo-de-dados.md).
+
+## Estrutura (MVC)
 
 ```
-app/                 código do CodeIgniter 4 (Controllers, Models, Views, Database)
-docs/analise/        documento de análise de cada sprint
-docs/                modelo de dados, backlog e cronograma
-referencia/          a versão que já está no ar: ficha, regras de pontuação e campos
-integracoes/n8n/     fluxo do n8n que manda o aviso no WhatsApp
-integracoes/whatsapp/ modelos de mensagem do WhatsApp
+site/                 View: a ficha do cliente
+netlify/functions/    Controller: recebe, valida e salva (ficha.mjs, arquivo.mjs)
+supabase/             Model: tabelas, regras e dados de exemplo
+n8n/                  Controller de integração: pontua, cria o card no Trello e avisa no WhatsApp
+whatsapp/             Modelos de mensagem para aprovar na Meta
+docs/                 Análise de cada sprint, modelo de dados, backlog e cronograma
+referencia/           Regras de pontuação e o quadro antigo do Notion
+tests/                Testes automatizados (node --test)
 ```
+
+## Rotas
+
+| Método | Rota | Onde | O que faz |
+| --- | --- | --- | --- |
+| GET | `/` | Netlify | Abre a ficha |
+| POST | `/api/ficha` | Função | Valida, salva no Supabase e chama o n8n |
+| GET | `/arquivo/:ficha/:foto` | Função | Link temporário da foto |
+| POST | `/webhook/russo-tattoer` | n8n | Pontua, cria o card no Trello e avisa no WhatsApp |
+| POST | `/webhook/trello` | n8n | Card movido: atualiza o status no banco |
+| CRON | todo dia às 9h | n8n | Resumo das fichas pendentes no WhatsApp |
 
 ## Como contribuir
 
-1. Crie uma branch por tarefa: `git checkout -b feat/crud-clientes`.
-2. Faça commits pequenos, em português: `feat(clientes): listagem com busca`.
+1. Crie uma branch por tarefa: `git checkout -b feat/trello-sync`.
+2. Faça commits pequenos, em português: `feat(trello): cria card com etiqueta de temperatura`.
 3. Abra um pull request e peça revisão de outra pessoa do grupo.
 
 O barema avalia commits de todos os integrantes ao longo das sprints, então cada um faz commit da própria frente.

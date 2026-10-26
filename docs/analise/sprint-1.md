@@ -27,30 +27,36 @@ Duas frentes, em outubro de 2026:
 
 ## 3. Persona
 
-**Vinicius "Russo"**, 25 anos, tatuador autônomo no Expurgo Tattoo, Vila Velha (ES). Atende Vitória e Vila Velha.
+> Revisada depois do retorno do professor: a persona representa o público para quem vamos vender. O Russo é o nosso cliente, e as informações dele serviram de base.
+
+**Lucas Andrade**, 28 anos, tatuador autônomo (MEI). Aluga uma bancada num estúdio compartilhado em Vila Velha (ES).
 
 | | |
 | --- | --- |
-| Contexto | Tatua freehand, em preto e cinza: dark ornamental, blackwork, anime, lettering. Vende pelo Instagram e fecha pelo WhatsApp. |
-| Objetivos | Passar o dia tatuando, não respondendo mensagem. Chegar na conversa sabendo ideia, local, tamanho e quanto o cliente quer investir. |
-| Dores | Perde orçamento na DM, responde tarde, repete as mesmas perguntas e não sabe quem está pronto para fechar. |
-| Comportamento digital | Usa o celular o dia todo, Instagram e WhatsApp. Não usa sistema de gestão. Fala direto e informal ("mano", "brabo", "tamo junto"). |
+| Contexto | Ninguém cuida do atendimento: ele responde as DMs entre uma sessão e outra. Vende pelo Instagram e fecha pelo WhatsApp. |
+| Objetivos | Encher a agenda com os trabalhos que ele quer fazer e passar o dia tatuando, não respondendo mensagem. |
+| Dores | Os pedidos chegam sem foto nem tamanho. Ele responde tarde, perde orçamento e não sabe quem está pronto para fechar. |
+| Comportamento digital | Faz tudo pelo celular. Tem "orçamento via DM" na bio, sem link, e não usa sistema de gestão. |
 
-Fundamentação: entrevista com o tatuador e observação do perfil público. É um cliente real, não uma persona inventada.
+Fundamentação: entrevista com o nosso cliente, observação de perfis de tatuadores no Instagram e dados do Sebrae (item 4).
 
 **Usuário secundário:** o cliente final, que chega pelo Instagram no celular e preenche a ficha.
 
 ## 4. Público-alvo
 
+> Revisado: mais nichado, como pediu o professor.
+
+**Tatuadores que não têm ninguém cuidando do atendimento, ou que têm, mas o atendimento não funciona** (demora, pedido perdido, orçamento sem resposta).
+
 | Segmentação | Descrição |
 | --- | --- |
-| Demográfica | Tatuadores autônomos (MEI) e estúdios pequenos, de 1 a 3 artistas |
-| Geográfica | Começo na Grande Vitória (ES); depois, qualquer cidade |
-| Comportamental | Capta pelo Instagram, fecha pelo WhatsApp, não usa sistema de gestão |
+| Demográfica | Tatuadores autônomos (MEI) e estúdios de até 5 artistas, sem recepção |
+| Geográfica | Começo na Grande Vitória (ES), onde está o nosso cliente; depois, qualquer cidade |
+| Comportamental | Bio com "orçamento via DM", sem link na bio, comentários "eu quero" sem resposta |
 
-**Tamanho do mercado.** Segundo levantamento do Sebrae com dados do CNAE, 6.763 negócios de tatuagem e piercing foram abertos no Brasil em 2022, 97% deles como MEI. As aberturas cresceram 35% de 2019 a 2022 ([Money Times, abr/2023](https://www.moneytimes.com.br/microempreendedores-individuais-representam-97-dos-estudios-de-tatuagem-e-piercing-abertos-em-2022/)). O número do Espírito Santo será levantado na Sprint 2.
+**Tamanho do mercado.** Segundo levantamento do Sebrae com dados do CNAE, 6.763 negócios de tatuagem e piercing foram abertos no Brasil em 2022, 97% deles como MEI. As aberturas cresceram 35% de 2019 a 2022 ([Money Times, abr/2023](https://www.moneytimes.com.br/microempreendedores-individuais-representam-97-dos-estudios-de-tatuagem-e-piercing-abertos-em-2022/)).
 
-**Por que esse público precisa da solução:** quase todo tatuador trabalha sozinho e cuida ao mesmo tempo de atendimento, arte e agenda. O atendimento é o que fica para depois.
+**Por que esse público precisa da solução:** quase todo tatuador trabalha sozinho e cuida ao mesmo tempo de atendimento, arte e agenda. Contratar uma recepcionista custaria pelo menos o [salário mínimo de 2026](https://www.band.com.br/band-vale/noticias/salario-minimo-sobe-para-r-1621-a-partir-de-janeiro-de-2026-202512250915), R$ 1.621, sem encargos.
 
 ## 5. Proposta de valor
 
@@ -67,10 +73,10 @@ O tatuador chega na conversa sabendo o que o cliente quer, onde, de que tamanho 
 | RF01 | Enviar ficha com ideia, local, tamanho, faixa de investimento e contato | Cliente | Must |
 | RF02 | Enviar fotos do local do corpo e de referência | Cliente | Must |
 | RF03 | Pontuar cada ficha como quente, morna ou fria | Sistema | Should |
-| RF04 | Entrar no painel com e-mail e senha | Tatuador | Must |
-| RF05 | Listar fichas e filtrar por status e região | Tatuador | Must |
-| RF06 | Ver, editar status e orçamento, e excluir uma ficha | Tatuador | Must |
-| RF07 | Cadastrar, editar e excluir clientes | Tatuador | Must |
+| RF04 | Ver as fichas num quadro no Trello, uma coluna por status | Tatuador | Must |
+| RF05 | Filtrar as fichas por temperatura e região (etiquetas do card) | Tatuador | Must |
+| RF06 | Mudar o status movendo o card, editar o orçamento e arquivar a ficha | Tatuador | Must |
+| RF07 | Reconhecer o cliente pelo Instagram e juntar as fichas dele | Sistema | Must |
 | RF08 | Agendar sessões de uma ficha fechada | Tatuador | Should |
 | RF09 | Avisar o tatuador no WhatsApp quando chega ficha | Sistema | Should |
 | RF10 | Resumo diário das fichas pendentes no WhatsApp | Sistema | Could |
@@ -84,7 +90,7 @@ O tatuador chega na conversa sabendo o que o cliente quer, onde, de que tamanho 
 | RNF03 | LGPD: a ficha não pede dados de saúde; fotos só abrem com login |
 | RNF04 | Fotos comprimidas no celular antes do envio (até 1600 px) |
 | RNF05 | Textos e mensagens de erro em português, na voz do tatuador |
-| RNF06 | PHP 8.2+, MySQL, padrão MVC do CodeIgniter 4, migrations e seeders |
+| RNF06 | Separação MVC: ficha (View), funções do Netlify e n8n (Controller), Supabase (Model) |
 
 ## 8. Histórias de usuário
 
@@ -101,10 +107,10 @@ O tatuador chega na conversa sabendo o que o cliente quer, onde, de que tamanho 
 | Must | Should | Could | Won't (agora) |
 | --- | --- | --- | --- |
 | Ficha com fotos | Pontuação quente, morna, fria | Resumo diário no WhatsApp | Pagamento online do sinal |
-| Login do painel | Agenda de sessões | Exportar fichas | Agenda pública |
-| Lista com filtros | Aviso no WhatsApp | | App nativo |
-| CRUD de fichas | | | |
-| CRUD de clientes | | | |
+| Fichas salvas no banco | Agenda de sessões | Exportar fichas | Agenda pública |
+| Card no Trello por ficha | Aviso no WhatsApp | | App nativo |
+| Status sincronizado com o quadro | | | Painel próprio (o Trello cumpre esse papel) |
+| Cliente reconhecido pelo Instagram | | | |
 
 **Como a matriz decide o plano:** os itens Must entram na Sprint 3, parte 1 (05/11). Os Should entram na parte 2 (11/11). Os Could só entram se sobrar tempo. Os Won't ficam fora do trabalho por custo ou complexidade.
 
@@ -113,15 +119,16 @@ O tatuador chega na conversa sabendo o que o cliente quer, onde, de que tamanho 
 ```mermaid
 flowchart LR
   C[Cliente no celular] --> F[Ficha pública]
-  F --> CI[CodeIgniter 4]
-  P[Painel do tatuador] --> CI
-  CI --> DB[(MySQL)]
-  CI -- após salvar --> N[n8n]
+  F --> API[Função /api/ficha]
+  API --> DB[(Supabase)]
+  API --> N[n8n]
+  N --> T[Quadro no Trello]
   N --> W[WhatsApp do tatuador]
+  T -- card movido --> N
 ```
 
 ## 11. Próxima sprint (27/10)
 
 - Viabilidade: concorrentes, diferencial, modelo de assinatura e riscos.
 - Estimativa de preço: horas, hospedagem, domínio, custo do WhatsApp, manutenção e margem.
-- Base técnica: CodeIgniter 4 rodando, banco criado por migrations e seeders, README.
+- Base técnica: banco modelado no Supabase, estrutura MVC, rotas e protótipo das telas.

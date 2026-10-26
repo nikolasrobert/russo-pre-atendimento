@@ -1,134 +1,89 @@
 # Modelo de dados
 
-Banco `russo_painel` (MySQL, `utf8mb4`). Cada tabela vira uma migration em `app/Database/Migrations` e um Model em `app/Models`. Os valores das listas vêm das perguntas da ficha que já está no ar ([referencia/ficha-original.html](../referencia/ficha-original.html)).
+Banco no Supabase (Postgres). O esquema está em [supabase/migrations/0001_schema.sql](../supabase/migrations/0001_schema.sql) e os dados de exemplo em [supabase/seed.sql](../supabase/seed.sql). Os dois foram testados num Postgres 16.
+
+O banco foi pensado para vários clientes: tudo pendura num estúdio, e cada estúdio só enxerga os próprios dados pela regra de segurança por linha (RLS). As funções do Netlify e o n8n usam a chave de serviço, que fica só no servidor.
 
 ```mermaid
 erDiagram
-  usuarios {
-    int id PK
-    varchar nome
-    varchar email UK
-    varchar senha_hash
+  estudios ||--o{ tatuadores : "tem"
+  estudios ||--o{ clientes : "atende"
+  tatuadores ||--o{ fichas : "recebe"
+  clientes ||--o{ fichas : "envia"
+  fichas ||--o{ fotos : "tem"
+  fichas ||--o{ sessoes : "gera"
+  estudios {
+    uuid id PK
+    text nome
+    text cidade
+    text plano
   }
-  clientes ||--o{ atendimentos : "faz"
+  tatuadores {
+    uuid id PK
+    uuid estudio_id FK
+    text nome
+    text whatsapp
+    text trello_board_id
+    uuid user_id
+  }
   clientes {
-    int id PK
-    varchar nome
-    varchar instagram
-    varchar whatsapp
-    varchar cidade
-    varchar regiao
+    uuid id PK
+    uuid estudio_id FK
+    text nome
+    text instagram
+    text whatsapp
+    text regiao
   }
-  atendimentos ||--o{ fotos : "tem"
-  atendimentos ||--o{ sessoes : "gera"
-  atendimentos {
-    int id PK
-    int cliente_id FK
+  fichas {
+    uuid id PK
+    uuid estudio_id FK
+    uuid tatuador_id FK
+    uuid cliente_id FK
     text ideia
-    varchar local_corpo
-    varchar tamanho
-    varchar faixa_investimento
+    text local_corpo
+    text tamanho
+    text faixa_investimento
     int pontuacao
-    varchar temperatura
-    varchar status
-    decimal valor_orcamento
+    text temperatura
+    text status
+    text trello_card_id
   }
   fotos {
-    int id PK
-    int atendimento_id FK
-    varchar arquivo
-    varchar tipo
+    uuid id PK
+    uuid ficha_id FK
+    text caminho
+    text tipo
   }
   sessoes {
-    int id PK
-    int atendimento_id FK
-    datetime inicio
-    decimal duracao_horas
-    decimal valor_sinal
-    varchar status
+    uuid id PK
+    uuid ficha_id FK
+    timestamptz inicio
+    numeric duracao_horas
+    numeric valor_sinal
+    text status
   }
 ```
 
-## usuarios
+## Tabelas
 
-Quem entra no painel (o tatuador).
-
-| Campo | Tipo | Regra |
+| Tabela | Para quê | Regras principais |
 | --- | --- | --- |
-| id | INT, PK, auto incremento | |
-| nome | VARCHAR(100) | obrigatório |
-| email | VARCHAR(150) | obrigatório, único, e-mail válido |
-| senha_hash | VARCHAR(255) | `password_hash()`, nunca a senha pura |
-| created_at, updated_at | DATETIME | `useTimestamps` |
+| `estudios` | Cada cliente nosso: um tatuador sozinho ou um estúdio | `plano` = `tatuador` ou `estudio` |
+| `tatuadores` | Quem recebe as fichas | WhatsApp com 12 ou 13 dígitos; `user_id` liga ao login do Supabase |
+| `clientes` | Quem preenche a ficha | Instagram válido e único por estúdio; `regiao` = `grande_vitoria` ou `fora` |
+| `fichas` | Cada pedido de orçamento | Ideia com 10+ caracteres; data obrigatória com "Tenho data marcada"; quem indicou obrigatório com "Indicação"; `status` numa lista fechada |
+| `fotos` | Fotos do local, referências e tattoo a cobrir | Caminho no bucket privado `fichas`; apagadas junto com a ficha |
+| `sessoes` | Sessões marcadas de uma ficha fechada | Duração de 0,5 a 12 horas |
 
-## clientes
+Status da ficha, na ordem do quadro: `novo` → `em_conversa` → `orcamento_enviado` → `agendado` → `fechado`, ou `perdido`. Arquivar o card no Trello marca `arquivado` (exclusão lógica).
 
-| Campo | Tipo | Regra |
-| --- | --- | --- |
-| id | INT, PK | |
-| nome | VARCHAR(100) | obrigatório, 2 a 100 caracteres |
-| instagram | VARCHAR(60) | obrigatório, sem o `@` |
-| whatsapp | VARCHAR(20) | obrigatório, só dígitos, 10 a 13 |
-| cidade | VARCHAR(80) | obrigatório |
-| regiao | VARCHAR(20) | `grande_vitoria` ou `fora` |
-| created_at, updated_at | DATETIME | |
+Temperatura: 8 pontos ou mais é `quente`, de 4 a 7 é `morna`, até 3 é `fria`. Regras em [referencia/pontuacao.md](../referencia/pontuacao.md).
 
-Cidades da Grande Vitória na ficha: Vitória, Vila Velha, Serra, Cariacica, Viana, Guarapari, Fundão. Qualquer outra vira `fora`.
+## Como o CRUD acontece
 
-## atendimentos
-
-Uma ficha enviada. Um cliente pode ter várias.
-
-| Campo | Tipo | Regra |
-| --- | --- | --- |
-| id | INT, PK | |
-| cliente_id | INT, FK → clientes.id | obrigatório |
-| experiencia | VARCHAR(30) | É a primeira · Tenho uma ou duas · Sou bem tatuado(a) · Você já me tatuou |
-| ideia | TEXT | obrigatório, mínimo 10 caracteres |
-| link_referencia | VARCHAR(255) | opcional, URL válida |
-| local_corpo | VARCHAR(40) | obrigatório, da lista da ficha |
-| tamanho | VARCHAR(40) | Até 5 cm · 5 a 10 cm · 10 a 15 cm · 15 a 25 cm · Mais de 25 cm · Fechamento · Não sei |
-| cobertura | TINYINT(1) | 0 ou 1 |
-| cor | VARCHAR(20) | Preto e cinza · Colorido · Confio em você |
-| faixa_investimento | VARCHAR(30) | Até R$ 500 · R$ 500 a 1.000 · R$ 1.000 a 2.000 · R$ 2.000 a 4.000 · Acima de R$ 4.000 · Prefiro que você me diga |
-| prazo | VARCHAR(40) | Sem pressa · Nos próximos 30 dias · Tenho data marcada |
-| data_limite | DATE | obrigatório só quando prazo = Tenho data marcada |
-| disponibilidade | VARCHAR(120) | uma ou mais opções, separadas por vírgula |
-| origem | VARCHAR(30) | Instagram · Indicação · Convenção / evento · Passei no estúdio · Outro |
-| indicado_por | VARCHAR(80) | obrigatório só quando origem = Indicação |
-| pontuacao | INT | calculada (ver [referencia/pontuacao.md](../referencia/pontuacao.md)) |
-| temperatura | VARCHAR(10) | `quente` · `morna` · `fria` |
-| status | VARCHAR(20) | `novo` · `em_conversa` · `orcamento_enviado` · `agendado` · `fechado` · `perdido`; padrão `novo` |
-| valor_orcamento | DECIMAL(10,2) | opcional, maior que zero |
-| observacoes | TEXT | opcional, anotação do tatuador |
-| created_at, updated_at | DATETIME | |
-
-## fotos
-
-| Campo | Tipo | Regra |
-| --- | --- | --- |
-| id | INT, PK | |
-| atendimento_id | INT, FK → atendimentos.id, `ON DELETE CASCADE` | |
-| arquivo | VARCHAR(255) | caminho dentro de `writable/uploads/fichas/{atendimento_id}/` |
-| tipo | VARCHAR(20) | `local` · `referencia` · `cobertura` |
-| created_at | DATETIME | |
-
-As fotos ficam em `writable/`, fora da pasta pública, e só abrem por uma rota do painel com login (LGPD).
-
-## sessoes
-
-| Campo | Tipo | Regra |
-| --- | --- | --- |
-| id | INT, PK | |
-| atendimento_id | INT, FK → atendimentos.id | obrigatório |
-| inicio | DATETIME | obrigatório, data futura ao criar |
-| duracao_horas | DECIMAL(4,1) | obrigatório, de 0,5 a 12 |
-| valor_sinal | DECIMAL(10,2) | opcional |
-| status | VARCHAR(20) | `marcada` · `realizada` · `remarcada` · `cancelada` |
-| created_at, updated_at | DATETIME | |
-
-## Seeders
-
-- `UsuarioSeeder`: o login do tatuador, senha lida de `PAINEL_SENHA_INICIAL` no `.env`.
-- `ExemploSeeder`: cerca de 8 clientes e fichas fictícias, a maioria da Grande Vitória.
-- `DatabaseSeeder`: chama os dois.
+| Operação | Onde |
+| --- | --- |
+| Criar | O cliente envia a ficha (`POST /api/ficha`) |
+| Ler | O tatuador vê o card no Trello; o n8n lê o banco para o resumo diário |
+| Atualizar | Mover o card muda o `status`; editar o card muda `valor_orcamento` |
+| Excluir | Arquivar o card marca a ficha como `arquivado` |

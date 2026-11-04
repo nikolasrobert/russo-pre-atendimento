@@ -1,0 +1,34 @@
+/* Painel: Bootstrap 5 no tema escuro, com as cores do projeto (preto, osso e vermelho). */
+:root,
+[data-bs-theme="dark"] {
+  --bs-body-bg: #121110;
+  --bs-body-color: #ece4d6;
+  --bs-secondary-color: #a89f92;
+  --bs-tertiary-bg: #1b1917;
+  --bs-border-color: #3a3531;
+  --bs-primary: #c8321e;
+  --bs-primary-rgb: 200, 50, 30;
+  --bs-link-color: #ece4d6;
+  --bs-link-hover-color: #ffffff;
+  --bs-link-color-rgb: 236, 228, 214;
+  --bs-card-bg: #1b1917;
+}
+
+.card { --bs-card-bg: #1b1917; --bs-card-border-color: #3a3531; }
+.table { --bs-table-bg: transparent; --bs-table-hover-bg: rgba(236, 228, 214, 0.05); }
+.list-group { --bs-list-group-bg: #1b1917; --bs-list-group-border-color: #3a3531; }
+
+.btn-primary {
+  --bs-btn-bg: #c8321e; --bs-btn-border-color: #c8321e;
+  --bs-btn-hover-bg: #a8291c; --bs-btn-hover-border-color: #a8291c;
+  --bs-btn-active-bg: #8f2318; --bs-btn-active-border-color: #8f2318;
+  --bs-btn-focus-shadow-rgb: 200, 50, 30;
+}
+
+.marca { font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.ideia { white-space: pre-line; }
+legend { float: none; }
+
+/* área de toque confortável no celular */
+.btn, .form-control, .form-select { min-height: 44px; }
+.btn-sm { min-height: 36px; }

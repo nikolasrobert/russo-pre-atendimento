@@ -31,4 +31,5 @@ legend { float: none; }
 
 /* área de toque confortável no celular */
 .btn, .form-control, .form-select { min-height: 44px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; }
 .btn-sm { min-height: 36px; }

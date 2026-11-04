@@ -30,7 +30,7 @@ export function layout({ titulo, corpo, logado = false, token = '', flash = '' }
     <a class="navbar-brand marca" href="/painel">Russo <span class="text-body-secondary fs-6">· painel</span></a>
     ${logado ? `<div class="d-flex gap-2">
       <a class="btn btn-primary btn-sm" href="/painel/fichas/nova">Nova ficha</a>
-      <form method="post" action="/painel/sair" class="m-0">${csrf(token)}<button class="btn btn-outline-secondary btn-sm" type="submit">Sair</button></form>
+      <form method="post" action="/painel/sair" class="m-0">${csrf(token)}<button class="btn btn-outline-light btn-sm" type="submit">Sair</button></form>
     </div>` : ''}
   </div>
 </nav>

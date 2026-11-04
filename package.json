@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node --test tests/*.test.js",
     "sync": "node scripts/sync-code.js",
-    "sync:check": "node scripts/sync-code.js --check"
+    "sync:check": "node scripts/sync-code.js --check",
+    "senha": "node scripts/gerar-senha.mjs"
   },
   "engines": {
     "node": ">=20"

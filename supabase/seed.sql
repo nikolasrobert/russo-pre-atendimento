@@ -30,3 +30,6 @@ insert into fotos (ficha_id, caminho, tipo) values
 
 insert into sessoes (ficha_id, inicio, duracao_horas, valor_sinal) values
   ('00000000-0000-0000-0000-000000000301', now() + interval '20 days', 4, 300);
+
+update fichas set tem_foto_local = true
+where id in ('00000000-0000-0000-0000-000000000301', '00000000-0000-0000-0000-000000000303');

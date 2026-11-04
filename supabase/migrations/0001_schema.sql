@@ -58,12 +58,15 @@ create table fichas (
   disponibilidade     text[] not null default '{}',
   origem              text,
   indicado_por        text,
+  tem_foto_local      boolean not null default false,  -- usado na ficha cadastrada à mão pelo painel
+  tem_referencia      boolean not null default false,
   pontuacao           integer not null default 0,
   temperatura         text not null check (temperatura in ('quente', 'morna', 'fria')),
   motivos             text,
   status              text not null default 'novo'
                         check (status in ('novo', 'em_conversa', 'orcamento_enviado', 'agendado', 'fechado', 'perdido', 'arquivado')),
   valor_orcamento     numeric(10, 2) check (valor_orcamento > 0),
+  observacoes         text check (char_length(observacoes) <= 2000),
   trello_card_id      text unique,
   criado_em           timestamptz not null default now(),
   atualizado_em       timestamptz not null default now(),

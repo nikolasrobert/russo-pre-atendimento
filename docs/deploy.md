@@ -68,11 +68,16 @@ TRELLO_CHAVE=... TRELLO_TOKEN=... npm run trello:webhook -- <TRELLO_QUADRO_ID> h
 
 1. No n8n: Workflows → Import from file → [n8n/workflow.json](../n8n/workflow.json).
 2. Credencial **Header Auth** do node "Aviso da função": nome `x-aviso-token`, valor = um texto aleatório. O mesmo texto vai no Netlify como `AVISO_TOKEN`.
-3. Credencial **Header Auth** do node "Mandar no WhatsApp": nome `Authorization`, valor `Bearer <token do WhatsApp>`.
-4. Variáveis do n8n (ou o bloco `CFG` no node "Montar mensagem"): `WA_PHONE_NUMBER_ID`, `WA_PARA` (o WhatsApp que recebe), `WA_MODO=texto` e `WA_AVISAR_TODAS=sim` para a demonstração.
+3. Credencial **Header Auth** do node "Mandar no WhatsApp":
+   - com **Evolution API**: nome `apikey`, valor = a chave da sua Evolution;
+   - com a **API da Meta**: nome `Authorization`, valor `Bearer <token do WhatsApp>`.
+4. No node "Montar mensagem" (bloco `CFG`) ou nas variáveis do n8n:
+   - Evolution: `WA_PROVEDOR: 'evolution'`, `EVO_URL` (endereço do servidor), `EVO_INSTANCIA` (instância conectada ao número de teste), `WA_PARA` (o WhatsApp que recebe, com 55 e DDD);
+   - Meta: `WA_PHONE_NUMBER_ID`, `WA_PARA`, `WA_MODO: 'texto'`;
+   - nos dois casos, para a demonstração: `WA_AVISAR_TODAS: 'sim'` (avisa toda ficha, não só as quentes).
 5. Ative o workflow e copie a URL de produção do webhook para o Netlify como `N8N_WEBHOOK_URL`.
 
-Número de teste da Meta: em developers.facebook.com → seu app → WhatsApp → API Setup. O número que vai receber precisa estar na lista de destinatários e mandar um "oi" para o número de teste antes da apresentação (abre a janela de 24h para o texto livre).
+Com a Evolution não há modelo para aprovar nem janela de 24h: a mensagem sai em texto livre pela instância conectada.
 
 ## 6. Teste de ponta a ponta
 

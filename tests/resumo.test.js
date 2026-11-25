@@ -82,3 +82,13 @@ test('n8n: modo texto (número de teste da Meta) manda o texto livre; sem destin
   const bloqueado = new Proxy({}, { get() { throw new Error('access to env vars denied'); } });
   assert.equal(new Function('$input', '$env', codigo)({ first: () => ({ json: { body: {} } }) }, bloqueado)[0].json.enviar, false);
 });
+
+test('n8n: com Evolution API, manda texto livre para a instância', () => {
+  const env = { WA_PROVEDOR: 'evolution', EVO_URL: 'https://evo.exemplo.com/', EVO_INSTANCIA: 'teste russo', WA_PARA: '27 99999-0000' };
+  const r = rodarNode({ tipo: 'ficha', temperatura: 'quente', texto: '🔥 Ficha quente: Marcos', params: ['a'] }, env);
+  assert.equal(r.enviar, true);
+  assert.equal(r.url, 'https://evo.exemplo.com/message/sendText/teste%20russo');
+  assert.deepEqual(r.waBody, { number: '27999990000', text: '🔥 Ficha quente: Marcos' });
+  const v1 = rodarNode({ tipo: 'resumo', texto: 'Bom dia' }, { ...env, EVO_VERSAO: 'v1' });
+  assert.deepEqual(v1.waBody, { number: '27999990000', textMessage: { text: 'Bom dia' } });
+});

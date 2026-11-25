@@ -4,6 +4,7 @@ node_modules/
 # Configuração local (credenciais ficam só aqui)
 .env
 .env.*
+!.env.example
 .netlify/
 
 # Supabase CLI

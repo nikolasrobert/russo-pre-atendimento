@@ -1,6 +1,8 @@
 # Modelo de dados
 
-Banco no Supabase (Postgres). O esquema está em [supabase/migrations/0001_schema.sql](../supabase/migrations/0001_schema.sql) e os dados de exemplo em [supabase/seed.sql](../supabase/seed.sql). Os dois foram testados num Postgres 16.
+Banco no Supabase (Postgres). O esquema está em [supabase/migrations/0001_schema.sql](../supabase/migrations/0001_schema.sql) e [0002_sprint4.sql](../supabase/migrations/0002_sprint4.sql), e os dados de exemplo em [supabase/seed.sql](../supabase/seed.sql). Estão aplicados no projeto `russo-pre-atendimento` do Supabase.
+
+A Sprint 4 acrescentou em `fichas`: `trello_card_url` (link do card), `extras` (respostas sem coluna própria, como a idade da tattoo coberta) e `canal` (`site` ou `painel`); e em `sessoes` uma regra que permite só uma sessão marcada por ficha.
 
 O banco foi pensado para vários clientes: tudo pendura num estúdio, e cada estúdio só enxerga os próprios dados pela regra de segurança por linha (RLS). As funções do Netlify e o n8n usam a chave de serviço, que fica só no servidor.
 

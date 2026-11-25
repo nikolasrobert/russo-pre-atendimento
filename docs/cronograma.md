@@ -42,6 +42,8 @@ Duas pessoas apresentam. Slides: "Russo · Sprint 2".
 
 ## 24/11 e 26/11 · Sprint 4 · Entrega final
 
+Todos apresentam. Slides: "Russo · Entrega final". Roteiro, demonstração, plano B e perguntas da defesa: [entrega-final.md](entrega-final.md).
+
 | Bloco | Tempo | Quem fala |
 | --- | --- | --- |
 | Problema e pesquisa | 2 min | Nikolas Robert |

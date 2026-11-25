@@ -1,46 +1,45 @@
 # Integrações
 
-O n8n é o controller de integração: recebe a ficha da função do Netlify, pontua, cria o card no Trello e avisa no WhatsApp. Também escuta o Trello para manter o status da ficha em dia no banco.
+Desde a Sprint 4, a lógica das integrações está em **código testado** (Netlify Functions). O n8n ficou só com o envio do WhatsApp, porque é lá que fica a credencial da Meta.
 
 ## Fluxos
 
-| Fluxo | Gatilho | O que faz |
-| --- | --- | --- |
-| Ficha nova | `POST /webhook/russo-tattoer`, chamado pela função | Pontua, grava a pontuação no Supabase, cria o card no Trello e avisa no WhatsApp se a ficha for quente |
-| Card movido | Webhook do Trello (`POST /webhook/trello`) | Atualiza `status` da ficha; card arquivado vira `arquivado` |
-| Resumo diário | Todo dia às 9h | Busca as fichas pendentes no Supabase e manda o resumo no WhatsApp |
+| Fluxo | Gatilho | Onde | O que faz |
+| --- | --- | --- | --- |
+| Ficha nova | `POST /api/ficha` | `netlify/functions/ficha.mjs` | Valida, pontua, grava no Supabase, sobe as fotos, cria o card em "Novas" e pede o aviso |
+| Card movido | Webhook do Trello em `/api/trello` | `netlify/functions/trello.mjs` | Atualiza o `status`; "Agendado" com data cria ou remarca a sessão; "Perdido" e arquivar cancelam |
+| Resumo diário | Todo dia às 9h de Brasília | `netlify/functions/resumo.mjs` | Lê novas, sessões de hoje e orçados parados há 5 dias e pede o aviso |
+| Aviso | `POST /webhook/russo-avisos` | `n8n/workflow.json` | Monta a mensagem e manda pela WhatsApp Cloud API |
 
-## Formato que a função manda para o n8n
-
-O formato é o que o fluxo já entende:
+## O que a função manda para o n8n
 
 ```json
 {
-  "eventType": "FORM_RESPONSE",
-  "data": {
-    "responseId": "uuid-da-ficha",
-    "createdAt": "2026-11-11T14:00:00Z",
-    "fields": [
-      { "label": "Como te chamo?", "value": "Ana" },
-      { "label": "Quanto você tem pra investir nesse projeto?", "value": "R$ 1.000 a 2.000" }
-    ]
-  }
+  "tipo": "ficha",
+  "temperatura": "quente",
+  "params": ["Marcos · R$2.000 a 4.000 · 30 dias · Coxa", "Uma cobra enrolada num punhal…", "15 a 25 cm · Preto e cinza · nota 10"],
+  "botao": "AbCd1234",
+  "texto": "🔥 Ficha quente: … (versão em texto livre, para o número de teste)"
 }
 ```
 
-Os `label` são os títulos das perguntas da ficha. A lista completa está em [n8n/code/normaliza.js](../n8n/code/normaliza.js).
+No resumo, `tipo` é `"resumo"`, `params` são [quantidade, novas, sessões de hoje, orçados parados] e `botao` é o id curto do quadro. O cabeçalho `x-aviso-token` precisa bater com a credencial do n8n.
 
 ## Trello
 
-- Um workspace por cliente nosso, com um quadro por tatuador.
-- Colunas: Novas, Em conversa, Orçamento enviado, Agendado, Fechado, Perdido.
-- Etiquetas: QUENTE, MORNA e FRIA, sempre com a pontuação no texto, não só a cor.
-- O n8n usa os nodes nativos "Trello" (criar card) e "Trello Trigger" (card movido). A credencial fica no n8n.
+- Um quadro por tatuador, criado com `npm run trello:quadro`.
+- Colunas: Novas, Em conversa, Orçamento enviado, Agendado, Fechado, Perdido. O código reconhece a coluna pelo nome (com ou sem acento).
+- Etiquetas: QUENTE, MORNA e FRIA, e a temperatura também vai escrita no título do card.
+- O webhook é cadastrado com `npm run trello:webhook` e cada chamada é conferida pela assinatura HMAC do Trello (`TRELLO_SEGREDO`).
 
 ## Arquivos
 
 | Arquivo | O que é |
 | --- | --- |
-| `n8n/workflow.json` | Fluxo atual (ainda com o Notion; a troca para Trello e Supabase é da Sprint 3) |
-| `n8n/code/*.js` | Código dos nodes de código, em arquivos separados para revisão (`npm run sync` copia para o workflow) |
-| `whatsapp/templates.md` | Modelos de mensagem do WhatsApp para aprovar na Meta |
+| `netlify/lib/trello.mjs` | Cliente do Trello, texto do card, colunas e assinatura |
+| `netlify/lib/quadro.mjs` | Regras do quadro: status e sessões |
+| `netlify/lib/resumo.mjs` | Consulta e texto do resumo |
+| `netlify/lib/avisos.mjs` | Texto do aviso e envio para o n8n |
+| `n8n/workflow.json` e `n8n/code/mensagem.js` | Fluxo do n8n (`npm run sync` copia o código para o workflow) |
+| `whatsapp/templates.md` | Modelos de mensagem para aprovar na Meta |
+| `referencia/n8n-notion/` | O fluxo antigo, com o Notion, que roda hoje para o Russo |

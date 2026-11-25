@@ -5,14 +5,16 @@ import { randomUUID } from 'node:crypto';
 const copia = (o) => (o == null ? o : structuredClone(o));
 
 export class MemoriaStore {
-  constructor({ clientes = [], fichas = [] } = {}) {
+  constructor({ clientes = [], fichas = [], sessoes = [] } = {}) {
     this.clientes = clientes.map(copia);
     this.fichas = fichas.map(copia);
+    this.sessoes = sessoes.map(copia);
   }
 
   montar(f) {
     const cliente = this.clientes.find((c) => c.id === f.cliente_id);
-    return copia({ ...f, cliente });
+    const sessoes = this.sessoes.filter((s) => s.ficha_id === f.id);
+    return copia({ ...f, cliente, sessoes });
   }
 
   async listarFichas({ status, temperatura, regiao, busca } = {}) {

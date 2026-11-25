@@ -38,7 +38,7 @@ export class FichaModel {
 
   async criar({ cliente, ficha }) {
     const c = await this.store.salvarCliente(cliente);
-    const salva = await this.store.inserirFicha({ ...ficha, ...pontuar(ficha), cliente_id: c.id });
+    const salva = await this.store.inserirFicha({ ...ficha, ...pontuar(ficha), cliente_id: c.id, canal: 'painel' });
     return salva;
   }
 

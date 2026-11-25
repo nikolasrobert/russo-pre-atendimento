@@ -11,6 +11,17 @@ import {
 
 const link = (id, sufixo = '') => `/painel/fichas/${encodeURIComponent(id)}${sufixo}`;
 
+// só vira link se for mesmo um card do Trello
+const linkTrello = (url) => (/^https:\/\/trello\.com\/c\/[A-Za-z0-9]+/.test(String(url || ''))
+  ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">Abrir card</a>` : '—');
+
+function sessaoMarcada(f) {
+  const s = (f.sessoes || []).find((x) => x.status === 'marcada');
+  if (!s) return '—';
+  const quando = new Date(new Date(s.inicio).getTime() - 3 * 3600000).toISOString();
+  return `${esc(quando.slice(8, 10))}/${esc(quando.slice(5, 7))} às ${esc(quando.slice(11, 16))} · ${esc(String(s.duracao_horas).replace('.', ','))}h`;
+}
+
 // ---------------------------------------------------------------------------
 // LISTA (Read)
 // ---------------------------------------------------------------------------
@@ -118,6 +129,8 @@ export function detalhe({ ficha: f }) {
     <section class="card mb-4"><div class="card-body">
       <h2 class="h5 card-title mb-3">Atendimento</h2>
       <dl class="row mb-0">
+        ${item('Sessão', sessaoMarcada(f))}
+        ${item('Trello', linkTrello(f.trello_card_url))}
         ${item('Orçamento', esc(moeda(f.valor_orcamento) || '—'))}
         ${item('Observações', esc(f.observacoes || '—'))}
         ${item('Entrou em', esc(dataBR(f.criado_em)))}

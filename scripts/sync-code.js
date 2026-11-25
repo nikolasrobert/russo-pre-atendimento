@@ -7,9 +7,7 @@ const path = require('path');
 const root = path.join(__dirname, '..');
 const wfPath = path.join(root, 'n8n', 'workflow.json');
 const map = {
-  'Normalizar e pontuar': 'normaliza.js',
-  'Montar resumo': 'resumo.js',
-  'Config do resumo': 'config.js',
+  'Montar mensagem': 'mensagem.js',
 };
 
 const wf = JSON.parse(fs.readFileSync(wfPath, 'utf8'));

@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
 
-const load = (file) => fs.readFileSync(path.join(__dirname, '..', 'n8n', 'code', file), 'utf8');
+const load = (file) => fs.readFileSync(path.join(__dirname, 'code', file), 'utf8');
 const run = (code, input, env = {}, nodes = {}) =>
   new Function('$input', '$env', '$', code)(
     { first: () => ({ json: input }) }, env,

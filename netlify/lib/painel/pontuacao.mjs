@@ -1,6 +1,7 @@
 // Pontuação da ficha: mesma regra do n8n (n8n/code/normaliza.js), documentada em referencia/pontuacao.md.
 
-export function pontuar(f) {
+// semFotoDaCobertura: só a ficha do site sabe se a foto da tattoo antiga chegou
+export function pontuar(f, { semFotoDaCobertura = false } = {}) {
   let pontos = 0;
   const motivos = [];
   const somar = (p, motivo) => { pontos += p; motivos.push(`${p > 0 ? '+' : ''}${p} ${motivo}`); };
@@ -24,7 +25,7 @@ export function pontuar(f) {
 
   if (ideia.length > 120) somar(1, 'descreveu bem a ideia');
   if (ideia.length > 0 && ideia.length < 40) somar(-1, 'ideia vaga');
-  // a regra "cobertura sem foto da tattoo atual" (−2) fica só no n8n: a ficha cadastrada à mão não leva fotos
+  if (f.cobertura && semFotoDaCobertura) somar(-2, 'cobertura sem foto da tattoo atual');
   if (/at[ée] R\$ ?500/i.test(faixa) && /(15|25|fechamento)/i.test(tamanho)) somar(-2, 'orçamento x tamanho incompatível');
 
   const temperatura = pontos >= 8 ? 'quente' : pontos >= 4 ? 'morna' : 'fria';

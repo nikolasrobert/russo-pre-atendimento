@@ -1,88 +1,40 @@
-// Recebe a ficha do site, guarda as fotos no Netlify Blobs e repassa pro n8n
-// no mesmo formato do webhook do Tally (assim o workflow não muda).
+// Recebe a ficha do site (POST /api/ficha) e entrega para o controller em netlify/lib/ficha/receber.mjs.
 //
-// Variáveis no Netlify: N8N_WEBHOOK_URL (obrigatória) e FICHA_TOKEN (opcional,
-// mandado no header x-ficha-token pro n8n conferir).
-const MAX_ARQUIVOS = 12;
-const MAX_BYTES = 4.5 * 1024 * 1024;  // por arquivo, depois da compressão no celular
-const TIPOS = /^image\/(jpeg|png|webp|heic|heif|gif)$/;
+// Variáveis no Netlify:
+//   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, ESTUDIO_ID, TATUADOR_ID   obrigatórias
+//   TRELLO_CHAVE, TRELLO_TOKEN, TRELLO_LISTA_NOVAS                      card no Trello
+//   TRELLO_ETIQUETA_QUENTE, TRELLO_ETIQUETA_MORNA, TRELLO_ETIQUETA_FRIA  etiquetas (opcionais)
+//   N8N_WEBHOOK_URL, AVISO_TOKEN                                        aviso no WhatsApp pelo n8n
+import { receberFicha } from '../lib/ficha/receber.mjs';
+import { Supabase } from '../lib/supabase.mjs';
+import { Trello } from '../lib/trello.mjs';
 
 const json = (status, obj) => new Response(JSON.stringify(obj), {
-  status, headers: { 'content-type': 'application/json; charset=utf-8' },
+  status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
 });
 
-export async function processar(req, { store, env, fetch }) {
+export async function processar(req, { env, fetch = globalThis.fetch, agora, uuid, log = console }) {
   if (req.method !== 'POST') return json(405, { erro: 'Método não permitido.' });
-
-  const destino = env.N8N_WEBHOOK_URL;
-  if (!destino) return json(500, { erro: 'Ficha fora do ar por configuração. Me chama no direct.' });
+  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY || !env.ESTUDIO_ID || !env.TATUADOR_ID) {
+    log.error('ficha sem configuração do Supabase');
+    return json(503, { erro: 'Ficha fora do ar por configuração. Me chama no direct.' });
+  }
 
   let form;
-  try { form = await req.formData(); }
-  catch { return json(400, { erro: 'Não consegui ler o envio. Tenta de novo.' }); }
+  try { form = await req.formData(); } catch { return json(400, { erro: 'Não consegui ler o envio. Tenta de novo.' }); }
 
-  // honeypot: robô preenche o campo escondido, gente não
-  if (String(form.get('site') || '').trim()) return json(200, { ok: true });
-
-  let respostas;
-  try { respostas = JSON.parse(String(form.get('respostas') || '[]')); }
-  catch { return json(400, { erro: 'Respostas inválidas.' }); }
-  if (!Array.isArray(respostas) || !respostas.length) return json(400, { erro: 'Ficha vazia.' });
-
-  const id = crypto.randomUUID();
-  const origem = new URL(req.url).origin;
-  const arquivos = {};  // label -> [{ url }]
-  let n = 0;
-
-  for (const [chave, valor] of form.entries()) {
-    if (!chave.startsWith('arquivo:') || typeof valor === 'string') continue;
-    if (++n > MAX_ARQUIVOS) break;
-    if (!TIPOS.test(valor.type) || valor.size > MAX_BYTES) continue;
-    const label = chave.slice('arquivo:'.length);
-    const nome = String(valor.name || 'foto.jpg').replace(/[^\w.-]/g, '_');
-    const key = `${id}/${n}-${nome}`;
-    await store.set(key, await valor.arrayBuffer(), { metadata: { contentType: valor.type } });
-    (arquivos[label] = arquivos[label] || []).push({ url: `${origem}/arquivo/${key}` });
-  }
-
-  const fields = respostas
-    .filter(r => r && typeof r.label === 'string')
-    .map(r => ({ label: r.label.slice(0, 200), value: Array.isArray(r.value) ? r.value.map(String) : String(r.value).slice(0, 5000) }));
-  for (const [label, lista] of Object.entries(arquivos)) fields.push({ label, value: lista });
-
-  const payload = {
-    eventType: 'FORM_RESPONSE',
-    source: 'site',
-    data: { responseId: id, createdAt: new Date().toISOString(), fields },
-  };
+  const db = new Supabase({ url: env.SUPABASE_URL, chave: env.SUPABASE_SERVICE_ROLE_KEY, fetch });
+  const trello = env.TRELLO_CHAVE && env.TRELLO_TOKEN ? new Trello({ chave: env.TRELLO_CHAVE, token: env.TRELLO_TOKEN, fetch }) : null;
 
   try {
-    const r = await fetch(destino, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        ...(env.FICHA_TOKEN ? { 'x-ficha-token': env.FICHA_TOKEN } : {}),
-      },
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(9000),
-    });
-    if (!r.ok) {
-      console.error('n8n respondeu', r.status, await r.text().catch(() => ''));
-      return json(502, { erro: 'A ficha não chegou do outro lado. Tenta de novo em um minuto.' });
-    }
+    const { status, corpo } = await receberFicha(form, { db, trello, env, origem: new URL(req.url).origin, agora, uuid, fetch, log });
+    return json(status, corpo);
   } catch (e) {
-    // timeout: o n8n pode ter recebido e só demorado pra responder
-    console.error('falha ao chamar o n8n', e && e.name, e && e.message);
-    if (e && e.name === 'TimeoutError') return json(200, { ok: true, id, aviso: 'n8n demorou pra responder' });
-    return json(502, { erro: 'A ficha não chegou do outro lado. Tenta de novo em um minuto.' });
+    log.error('ficha não foi gravada', e.message);
+    return json(502, { erro: 'A ficha não foi gravada. Suas respostas continuam aí: tenta de novo em um minuto.' });
   }
-
-  return json(200, { ok: true, id });
 }
 
-export default async (req) => {
-  const { getStore } = await import('@netlify/blobs');
-  return processar(req, { store: getStore('fichas'), env: process.env, fetch: globalThis.fetch });
-};
+export default (req) => processar(req, { env: process.env });
 
 export const config = { path: '/api/ficha' };

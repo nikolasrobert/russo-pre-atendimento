@@ -2,18 +2,17 @@
   "name": "russo-pre-atendimento",
   "version": "1.0.0",
   "private": true,
-  "description": "Pré-atendimento para tatuadores: ficha → Netlify Functions → Supabase → n8n → Trello e WhatsApp",
+  "description": "Pré-atendimento para tatuadores: ficha → Netlify Functions → Supabase → Trello, com aviso no WhatsApp pelo n8n",
   "scripts": {
     "test": "node --test tests/*.test.js",
     "sync": "node scripts/sync-code.js",
     "sync:check": "node scripts/sync-code.js --check",
-    "senha": "node scripts/gerar-senha.mjs"
+    "senha": "node scripts/gerar-senha.mjs",
+    "trello:quadro": "node scripts/trello-quadro.mjs",
+    "trello:webhook": "node scripts/trello-webhook.mjs"
   },
   "engines": {
     "node": ">=20"
   },
-  "type": "commonjs",
-  "dependencies": {
-    "@netlify/blobs": "^8.1.0"
-  }
+  "type": "commonjs"
 }

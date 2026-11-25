@@ -1,18 +1,22 @@
-// Serve as fotos guardadas pela ficha. A chave tem um UUID, então só abre quem tem o link (o card do Notion).
-import { getStore } from '@netlify/blobs';
+// Abre uma foto da ficha: gera um link assinado de 5 minutos no Storage e redireciona.
+// O caminho tem o id da ficha (UUID), então só abre quem tem o link do card.
+import { Supabase } from '../lib/supabase.mjs';
+import { BUCKET } from '../lib/ficha/receber.mjs';
 
-export default async (req) => {
-  const key = decodeURIComponent(new URL(req.url).pathname.replace(/^\/arquivo\//, ''));
-  if (!/^[0-9a-f-]{36}\/[\w.-]+$/.test(key)) return new Response('não encontrado', { status: 404 });
-  const res = await getStore('fichas').getWithMetadata(key, { type: 'stream' });
-  if (!res) return new Response('não encontrado', { status: 404 });
-  return new Response(res.data, {
-    headers: {
-      'content-type': (res.metadata && res.metadata.contentType) || 'image/jpeg',
-      'cache-control': 'private, max-age=31536000, immutable',
-      'x-robots-tag': 'noindex',
-    },
-  });
-};
+export const CAMINHO = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/(local|referencia|cobertura)-\d{1,2}\.(jpg|png|webp|heic|heif|gif)$/;
+
+export async function processar(req, { env, fetch = globalThis.fetch }) {
+  const caminho = decodeURIComponent(new URL(req.url).pathname.replace(/^\/arquivo\//, ''));
+  if (req.method !== 'GET' || !CAMINHO.test(caminho)) return new Response('não encontrado', { status: 404 });
+  try {
+    const db = new Supabase({ url: env.SUPABASE_URL, chave: env.SUPABASE_SERVICE_ROLE_KEY, fetch });
+    const url = await db.urlAssinada(BUCKET, caminho, 300);
+    return new Response(null, { status: 302, headers: { location: url, 'cache-control': 'no-store', 'x-robots-tag': 'noindex', 'referrer-policy': 'no-referrer' } });
+  } catch {
+    return new Response('não encontrado', { status: 404 });
+  }
+}
+
+export default (req) => processar(req, { env: process.env });
 
 export const config = { path: '/arquivo/*' };

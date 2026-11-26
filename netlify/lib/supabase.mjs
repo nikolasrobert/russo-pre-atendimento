@@ -30,7 +30,11 @@ export class Supabase {
       signal: AbortSignal.timeout(8000),
     });
     if (!r.ok) throw await this.erro(r);
-    return r.status === 204 ? null : r.json();
+    // com prefer: return=minimal o Supabase responde 201 sem corpo
+    if (r.status === 204) return null;
+    if (typeof r.text !== 'function') return r.json();
+    const texto = await r.text();
+    return texto ? JSON.parse(texto) : null;
   }
 
   async enviarArquivo(bucket, caminho, bytes, tipo) {
